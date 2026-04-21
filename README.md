@@ -222,8 +222,8 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-**Diya Lodha**
-- Email: diya05lodha@gmail.com
+**Sarthak Jain**
+-Email:kasliwalsarthak7972@gmail.com
 - GitHub: [@kasliwalsarthak7972](https://github.com/kasliwalsarthak7972)
 
 ---
