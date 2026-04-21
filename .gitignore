@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.env
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+*.corrupted
+*.broken
+
+# Python scripts used for fixes
+backend/fix_*.py
+backend/restore_*.py
+backend/remove_duplicates.py
+backend/add_endpoints.py
+backend/report_endpoints.py
+
+# Documentation (keeping only essential)
+COMPLETE_ENHANCEMENT_GUIDE.md
+FEATURES_SUMMARY.md
+QUICK_START.md
