@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'https://smart-healthcare-dashboard-p2jy.onrender.com'
+// Use environment variable if available, fallback to production URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-healthcare-dashboard-p2jy.onrender.com'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
