@@ -21,10 +21,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware - Allow frontend on localhost:3000
+# CORS middleware - Allow frontend on localhost:3000 and production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "*",  # Allow all origins for production (update with specific Vercel URL after deployment)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
