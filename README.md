@@ -103,6 +103,43 @@ npm run dev
 
 Frontend runs on: `http://localhost:3000`
 
+## 🌐 Deployment
+
+### Deploy to Render + Vercel (Recommended)
+
+**Full deployment guide**: See [DEPLOYMENT.md](DEPLOYMENT.md)
+
+#### Quick Steps:
+
+1. **Push to GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/repo.git
+   git push -u origin main
+   ```
+
+2. **Deploy Backend to Render**:
+   - Go to [render.com](https://render.com)
+   - Create Web Service from GitHub repo
+   - Root Directory: `backend`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+3. **Deploy Frontend to Vercel**:
+   - Go to [vercel.com](https://vercel.com)
+   - Import GitHub repository
+   - Root Directory: `frontend`
+   - Build Command: `npm run build`
+
+4. **Update API URL** in `frontend/src/api.js`:
+   ```javascript
+   const API_BASE_URL = 'https://YOUR-RENDER-URL.onrender.com'
+   ```
+
+**Your app will be live in under 10 minutes!** 🚀
+
 ## 📁 Project Structure
 
 ```

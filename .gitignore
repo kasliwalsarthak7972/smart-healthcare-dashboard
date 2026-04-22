@@ -1,16 +1,24 @@
-# Dependencies
-node_modules/
+# Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.db
+*.sqlite3
 
-# Build outputs
-dist/
-build/
+# Node
+node_modules/
+frontend/dist/
+frontend/build/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
@@ -18,25 +26,3 @@ Thumbs.db
 
 # Logs
 *.log
-npm-debug.log*
-
-# Testing
-coverage/
-
-# Temporary files
-*.tmp
-*.temp
-*.corrupted
-*.broken
-
-# Python scripts used for fixes
-backend/fix_*.py
-backend/restore_*.py
-backend/remove_duplicates.py
-backend/add_endpoints.py
-backend/report_endpoints.py
-
-# Documentation (keeping only essential)
-COMPLETE_ENHANCEMENT_GUIDE.md
-FEATURES_SUMMARY.md
-QUICK_START.md

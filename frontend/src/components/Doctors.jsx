@@ -1,98 +1,76 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-import { User, Star, Users, CheckCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Stethoscope, Phone, Mail } from 'lucide-react'
+import { doctorsAPI } from '../api'
 
-const Doctors = () => {
+export default function Doctors() {
   const [doctors, setDoctors] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchDoctors()
+    loadDoctors()
   }, [])
 
-  const fetchDoctors = async () => {
+  const loadDoctors = async () => {
     try {
-      const response = await axios.get('/api/doctors')
-      setDoctors(response.data)
-      setLoading(false)
+      setLoading(true)
+      const res = await doctorsAPI.getAll({ limit: 100 })
+      setDoctors(res.data)
     } catch (error) {
-      console.error('Error fetching doctors:', error)
+      console.error('Error loading doctors:', error)
+    } finally {
       setLoading(false)
     }
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading...</div>
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="stat-card">
-          <p className="text-sm text-gray-600 mb-1">Total Doctors</p>
-          <p className="text-2xl font-bold text-gray-900">{doctors.length}</p>
-        </div>
-        <div className="stat-card">
-          <p className="text-sm text-gray-600 mb-1">Available Now</p>
-          <p className="text-2xl font-bold text-green-600">
-            {doctors.filter(d => d.available).length}
-          </p>
-        </div>
-        <div className="stat-card">
-          <p className="text-sm text-gray-600 mb-1">Total Patients</p>
-          <p className="text-2xl font-bold text-blue-600">
-            {doctors.reduce((sum, d) => sum + d.patients_count, 0)}
-          </p>
-        </div>
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-white mb-2">Doctor Directory</h1>
+        <p className="text-white/60">View doctor information and availability</p>
       </div>
 
-      {/* Doctors Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {doctors.map((doctor) => (
-          <div key={doctor.id} className="card hover:shadow-lg transition-all duration-300">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 bg-gradient-to-br from-healthcare-blue to-blue-600 rounded-full flex items-center justify-center">
-                  <User className="w-7 h-7 text-white" />
+      {loading ? (
+        <div className="text-white text-center py-12">Loading doctors...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {doctors.map((doctor) => (
+            <div key={doctor.id} className="glass-card p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-blue-500/20 rounded-lg">
+                  <Stethoscope size={32} className="text-blue-400" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">{doctor.name}</h3>
-                  <p className="text-sm text-gray-600">{doctor.specialization}</p>
-                </div>
-              </div>
-              <div className={`w-3 h-3 rounded-full ${doctor.available ? 'bg-green-500' : 'bg-red-500'}`} />
-            </div>
-            
-            <div className="space-y-3 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Status</span>
-                <span className={`font-semibold ${doctor.available ? 'text-green-600' : 'text-red-600'}`}>
-                  {doctor.available ? 'Available' : 'Busy'}
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  doctor.available 
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
+                    : 'bg-red-500/20 text-red-400 border border-red-500/50'
+                }`}>
+                  {doctor.available ? 'Available' : 'Unavailable'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Patients</span>
-                <span className="font-semibold text-gray-900">{doctor.patients_count}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Rating</span>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span className="font-semibold text-gray-900">4.8</span>
+
+              <h3 className="text-xl font-bold text-white mb-1">{doctor.name}</h3>
+              <p className="text-white/60 mb-4">{doctor.specialization}</p>
+
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-white/80">
+                  <Phone size={16} />
+                  <span className="text-sm">{doctor.contact || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/80">
+                  <Mail size={16} />
+                  <span className="text-sm">{doctor.email || 'N/A'}</span>
                 </div>
               </div>
-            </div>
 
-            <div className="flex gap-2">
-              <button className="flex-1 btn-primary text-sm">View Profile</button>
-              <button className="btn-secondary text-sm">Schedule</button>
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-white/60 text-sm">
+                  Patients: <span className="text-white font-medium">{doctor.patients_count}</span>
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
-
-export default Doctors
