@@ -15,21 +15,29 @@
 - [README.md](file://README.md)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Enhanced financial reporting with Indian currency formatting using `toLocaleString('en-IN')`
+- Updated revenue display formatting in both Dashboard and Reports components
+- Improved localization support for Indian Rupee currency display
+
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Project Structure](#project-structure)
-3. [Core Components](#core-components)
-4. [Architecture Overview](#architecture-overview)
-5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
+2. [Project Structure](#project_structure)
+3. [Core Components](#core_components)
+4. [Architecture Overview](#architecture_overview)
+5. [Detailed Component Analysis](#detailed_component_analysis)
+6. [Dependency Analysis](#dependency_analysis)
+7. [Performance Considerations](#performance_considerations)
+8. [Troubleshooting Guide](#troubleshooting_guide)
 9. [Conclusion](#conclusion)
 
 ## Introduction
 The Dashboard component serves as the main analytics hub for the Smart Healthcare Dashboard system. It provides real-time statistics, interactive charts, and system overview capabilities through a modern glassmorphism interface. Built with React and Recharts, the component delivers comprehensive healthcare metrics visualization while maintaining excellent user experience across all device sizes.
 
 The dashboard integrates seamlessly with the backend FastAPI service to fetch live patient data, bed availability, revenue metrics, and recent activity feeds. Its responsive design ensures optimal viewing experience on desktop, tablet, and mobile devices.
+
+**Updated** Enhanced financial reporting with Indian currency formatting for improved localization and user experience.
 
 ## Project Structure
 The dashboard implementation follows a clean separation of concerns with distinct frontend and backend components:
@@ -81,9 +89,12 @@ The dashboard presents four primary KPI metrics through a responsive grid layout
 - Total Patients: Current patient count across the healthcare system
 - Available Beds: Real-time bed availability calculation
 - Critical Cases: Active critical condition patients
-- Revenue Today: Daily revenue calculation based on confirmed appointments
+- Revenue Today: Daily revenue calculation based on confirmed appointments with enhanced Indian currency formatting
 
 Each card features a glassmorphism design with animated icons and percentage change indicators for trend visualization.
+
+### Enhanced Financial Reporting
+**Updated** The revenue display now includes sophisticated Indian currency formatting using the `toLocaleString('en-IN')` method, providing localized number formatting with proper thousands separators and Rupee symbol display.
 
 ### Data Visualization
 The component utilizes Recharts for interactive chart rendering:
@@ -208,14 +219,16 @@ ClearLoading --> RenderUI["Render Dashboard UI"]
 - [Dashboard.jsx:37-62](file://frontend/src/components/Dashboard.jsx#L37-L62)
 
 #### Statistics Card Pattern
+**Updated** The StatCard component now includes enhanced revenue display formatting with Indian currency localization.
+
 The StatCard component provides a reusable pattern for displaying KPI metrics with consistent styling and behavior:
 
-| Metric Type | Icon | Color Scheme | Data Source |
-|-------------|------|--------------|-------------|
-| Total Patients | Users | Blue gradient | Dashboard stats |
-| Available Beds | Bed | Green gradient | Dashboard stats |
-| Critical Cases | AlertCircle | Red gradient | Dashboard stats |
-| Revenue Today | DollarSign | Purple gradient | Dashboard stats |
+| Metric Type | Icon | Color Scheme | Data Source | Currency Formatting |
+|-------------|------|--------------|-------------|-------------------|
+| Total Patients | Users | Blue gradient | Dashboard stats | No formatting |
+| Available Beds | Bed | Green gradient | Dashboard stats | No formatting |
+| Critical Cases | AlertCircle | Red gradient | Dashboard stats | No formatting | 
+| Revenue Today | DollarSign | Purple gradient | Dashboard stats | `toLocaleString('en-IN')` |
 
 Each card includes:
 - Large numeric display with appropriate formatting
@@ -458,6 +471,9 @@ State cleanup occurs automatically when components unmount, preventing memory le
 ### Caching Strategies
 While the current implementation focuses on real-time data, future enhancements could include intelligent caching for frequently accessed metrics to reduce server load.
 
+### Enhanced Currency Formatting Performance
+**Updated** The `toLocaleString('en-IN')` method provides efficient currency formatting optimized for Indian locale, ensuring consistent performance across different device capabilities.
+
 ## Troubleshooting Guide
 
 ### Common Issues and Solutions
@@ -494,6 +510,14 @@ While the current implementation focuses on real-time data, future enhancements 
 - Optimize chart data aggregation
 - Consider virtual scrolling for long lists
 
+#### Currency Formatting Issues
+**Updated** **Symptoms**: Revenue display shows incorrect formatting or unexpected characters
+**Causes**: Browser locale settings or JavaScript engine limitations
+**Solutions**:
+- Verify browser supports `Intl.NumberFormat` (modern browsers)
+- Check for null or undefined revenue values before formatting
+- Ensure proper fallback to simple number display if formatting fails
+
 **Section sources**
 - [Dashboard.jsx:37-62](file://frontend/src/components/Dashboard.jsx#L37-L62)
 - [main.py:15-22](file://backend/main.py#L15-L22)
@@ -505,7 +529,10 @@ Key strengths include:
 - **Real-time Data Integration**: Seamless connection to backend APIs for live metrics
 - **Interactive Visualizations**: Professional-grade charts using Recharts library
 - **Responsive Design**: Adaptive layouts that work across all device sizes
+- **Enhanced Financial Reporting**: Localized currency formatting for improved user experience
 - **Performance Optimization**: Concurrent data fetching and efficient rendering
 - **Error Handling**: Comprehensive error management and user feedback
 
-The component serves as an excellent foundation for healthcare analytics dashboards, with clear patterns for extending functionality, adding new metrics, and integrating additional data sources. Future enhancements could include WebSocket integration for true real-time updates, advanced filtering capabilities, and export functionality for report generation.
+**Updated** The recent enhancement of Indian currency formatting significantly improves the user experience for healthcare administrators in India, providing culturally appropriate financial data presentation with proper thousands separators and Rupee symbol display.
+
+The component serves as an excellent foundation for healthcare analytics dashboards, with clear patterns for extending functionality, adding new metrics, and integrating additional data sources. Future enhancements could include WebSocket integration for true real-time updates, advanced filtering capabilities, export functionality for report generation, and expanded internationalization support for additional locales beyond the Indian market.

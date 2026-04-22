@@ -3,14 +3,18 @@
 <cite>
 **Referenced Files in This Document**
 - [Reports.jsx](file://frontend/src/components/Reports.jsx)
+- [Dashboard.jsx](file://frontend/src/components/Dashboard.jsx)
 - [api.js](file://frontend/src/api.js)
-- [dashboard.py](file://backend/routers/dashboard.py)
 - [appointments.py](file://backend/routers/appointments.py)
-- [schemas.py](file://backend/schemas.py)
-- [models.py](file://backend/models.py)
 - [report_endpoints.py](file://backend/report_endpoints.py)
 - [README.md](file://README.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Enhanced financial reporting with Indian currency formatting using `toLocaleString('en-IN')`
+- Updated revenue display formatting in both Reports and Dashboard components
+- Improved internationalization support for financial data presentation
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -28,6 +32,8 @@ The Reports component is the analytics and insights hub of the Smart Healthcare 
 
 The component integrates seamlessly with backend reporting APIs to fetch aggregated data, supports customizable templates via reusable chart components, and offers export capabilities for PDF and CSV formats. It also includes scheduling and automated generation workflows for recurring reports and secure sharing mechanisms for distributing insights across departments.
 
+**Enhanced** Financial reporting now features proper Indian currency formatting with localized number display using `toLocaleString('en-IN')` for improved internationalization and user experience.
+
 ## Project Structure
 The Reports component spans both frontend and backend layers:
 - Frontend: React-based Reports page with Recharts visualizations and Lucide icons
@@ -39,47 +45,36 @@ The Reports component spans both frontend and backend layers:
 graph TB
 subgraph "Frontend"
 RPT["Reports.jsx"]
+DASH["Dashboard.jsx"]
 API["api.js"]
 RECHARTS["Recharts Library"]
 ICONS["Lucide React Icons"]
 end
 subgraph "Backend"
 MAIN["FastAPI App"]
-DASHBOARD_ROUTER["dashboard.py"]
 APPOINTMENTS_ROUTER["appointments.py"]
-MODELS["models.py"]
-SCHEMAS["schemas.py"]
 REPORT_ENDPOINTS["report_endpoints.py"]
 end
 RPT --> API
+DASH --> API
 API --> MAIN
-MAIN --> DASHBOARD_ROUTER
 MAIN --> APPOINTMENTS_ROUTER
 MAIN --> REPORT_ENDPOINTS
-DASHBOARD_ROUTER --> MODELS
-APPOINTMENTS_ROUTER --> MODELS
-REPORT_ENDPOINTS --> MODELS
-RPT --> RECHARTS
-RPT --> ICONS
+APPOINTMENTS_ROUTER --> |"Revenue Calculation"| RPT
+APPOINTMENTS_ROUTER --> |"Revenue Calculation"| DASH
 ```
 
 **Diagram sources**
 - [Reports.jsx:1-184](file://frontend/src/components/Reports.jsx#L1-L184)
-- [api.js:1-56](file://frontend/src/api.js#L1-L56)
-- [dashboard.py:1-81](file://backend/routers/dashboard.py#L1-L81)
-- [appointments.py:1-173](file://backend/routers/appointments.py#L1-L173)
-- [report_endpoints.py:1-252](file://backend/report_endpoints.py#L1-L252)
-- [models.py:1-75](file://backend/models.py#L1-L75)
-- [schemas.py:1-134](file://backend/schemas.py#L1-L134)
+- [Dashboard.jsx:1-194](file://frontend/src/components/Dashboard.jsx#L1-L194)
+- [api.js:1-57](file://frontend/src/api.js#L1-L57)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 **Section sources**
 - [Reports.jsx:1-184](file://frontend/src/components/Reports.jsx#L1-L184)
-- [api.js:1-56](file://frontend/src/api.js#L1-L56)
-- [dashboard.py:1-81](file://backend/routers/dashboard.py#L1-L81)
-- [appointments.py:1-173](file://backend/routers/appointments.py#L1-L173)
-- [report_endpoints.py:1-252](file://backend/report_endpoints.py#L1-L252)
-- [models.py:1-75](file://backend/models.py#L1-L75)
-- [schemas.py:1-134](file://backend/schemas.py#L1-L134)
+- [Dashboard.jsx:1-194](file://frontend/src/components/Dashboard.jsx#L1-L194)
+- [api.js:1-57](file://frontend/src/api.js#L1-L57)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 ## Core Components
 The Reports component consists of:
@@ -90,22 +85,23 @@ The Reports component consists of:
 - Scheduling Workflows: Automated generation of recurring reports with configurable frequency
 - Secure Sharing: Role-based access controls and encrypted report transmission
 
+**Enhanced** Financial reporting now displays revenue values with proper Indian currency formatting using `toLocaleString('en-IN')` for improved readability and localization.
+
 Key data aggregation patterns include:
 - Bed Occupancy Reports: 24-hour occupancy patterns across six time slots
-- Revenue Summaries: Today's revenue calculation based on confirmed appointments
+- Revenue Summaries: Today's revenue calculation based on confirmed appointments with localized formatting
 - Patient Outcome Statistics: Treatment success rates by department and demographics
 - Compliance Documentation: Department-wise statistics and AI-generated insights
 
 **Section sources**
 - [Reports.jsx:46-180](file://frontend/src/components/Reports.jsx#L46-L180)
-- [dashboard.py:12-62](file://backend/routers/dashboard.py#L12-L62)
-- [appointments.py:155-172](file://backend/routers/appointments.py#L155-L172)
-- [report_endpoints.py:74-180](file://backend/report_endpoints.py#L74-L180)
+- [Dashboard.jsx:79-108](file://frontend/src/components/Dashboard.jsx#L79-L108)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 ## Architecture Overview
 The Reports component follows a layered architecture:
-- Presentation Layer: React components render charts and KPI cards
-- API Layer: FastAPI endpoints serve analytics data
+- Presentation Layer: React components render charts and KPI cards with localized financial formatting
+- API Layer: FastAPI endpoints serve analytics data with currency information
 - Business Logic Layer: Data aggregation and computation
 - Data Access Layer: SQLAlchemy ORM models and database queries
 - Security Layer: CORS configuration and role-based access controls
@@ -113,38 +109,33 @@ The Reports component follows a layered architecture:
 ```mermaid
 sequenceDiagram
 participant User as "Administrator"
-participant Frontend as "Reports.jsx"
+participant Reports as "Reports.jsx"
+participant Dashboard as "Dashboard.jsx"
 participant API as "api.js"
-participant DashboardRouter as "dashboard.py"
 participant AppointmentsRouter as "appointments.py"
 participant DB as "SQLAlchemy Models"
-User->>Frontend : Open Reports Page
-Frontend->>API : Fetch Dashboard Stats
-API->>DashboardRouter : GET /api/dashboard/stats
-DashboardRouter->>DB : Query patients, appointments, doctors
-DB-->>DashboardRouter : Aggregated Stats
-DashboardRouter-->>API : DashboardStats
-API-->>Frontend : Stats Data
-Frontend->>API : Fetch Revenue Today
+User->>Reports : Open Reports Page
+Reports->>API : Fetch Dashboard Stats
 API->>AppointmentsRouter : GET /api/appointments/revenue/today
 AppointmentsRouter->>DB : Count confirmed appointments
 DB-->>AppointmentsRouter : Count
-AppointmentsRouter-->>API : Revenue Calculation
-API-->>Frontend : Revenue Data
-Frontend->>Frontend : Render Charts and KPIs
+AppointmentsRouter-->>API : Revenue Calculation with INR
+API-->>Reports : Formatted Revenue Data (₹ formatted)
+Reports->>Reports : Apply toLocaleString('en-IN') for display
+Reports-->>User : Display Revenue with Indian Currency Formatting
 ```
 
 **Diagram sources**
 - [Reports.jsx:16-29](file://frontend/src/components/Reports.jsx#L16-L29)
-- [api.js:48-53](file://frontend/src/api.js#L48-L53)
-- [dashboard.py:12-62](file://backend/routers/dashboard.py#L12-L62)
-- [appointments.py:155-172](file://backend/routers/appointments.py#L155-L172)
+- [Dashboard.jsx:37-62](file://frontend/src/components/Dashboard.jsx#L37-L62)
+- [api.js:29](file://frontend/src/api.js#L29)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 **Section sources**
 - [Reports.jsx:8-29](file://frontend/src/components/Reports.jsx#L8-L29)
-- [api.js:48-53](file://frontend/src/api.js#L48-L53)
-- [dashboard.py:12-62](file://backend/routers/dashboard.py#L12-L62)
-- [appointments.py:155-172](file://backend/routers/appointments.py#L155-L172)
+- [Dashboard.jsx:26-62](file://frontend/src/components/Dashboard.jsx#L26-L62)
+- [api.js:29](file://frontend/src/api.js#L29)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 ## Detailed Component Analysis
 
@@ -155,6 +146,7 @@ The Reports component orchestrates data fetching, visualization, and user intera
 - Recharts Integration: Implements line, pie, and bar charts with tooltips and custom styling
 - Loading States: Handles asynchronous data fetching with loading indicators
 - Error Handling: Centralized error logging during data retrieval
+- **Enhanced** Financial Display: Revenue values now use `toLocaleString('en-IN')` for proper Indian currency formatting
 
 ```mermaid
 classDiagram
@@ -164,6 +156,11 @@ class Reports {
 +useEffect loadReports()
 +loadReports() Promise
 +render() JSX.Element
+}
+class DashboardComponent {
++StatCard with Revenue Display
++toLocaleString('en-IN') formatting
++Indian Currency Symbol
 }
 class Recharts {
 +LineChart
@@ -178,15 +175,19 @@ class API {
 }
 Reports --> API : "fetches data"
 Reports --> Recharts : "renders charts"
+DashboardComponent --> API : "fetches revenue data"
+DashboardComponent --> DashboardComponent : "formats with toLocaleString('en-IN')"
 ```
 
 **Diagram sources**
 - [Reports.jsx:8-184](file://frontend/src/components/Reports.jsx#L8-L184)
-- [api.js:48-53](file://frontend/src/api.js#L48-L53)
+- [Dashboard.jsx:6-24](file://frontend/src/components/Dashboard.jsx#L6-L24)
+- [api.js:29](file://frontend/src/api.js#L29)
 
 **Section sources**
 - [Reports.jsx:8-184](file://frontend/src/components/Reports.jsx#L8-L184)
-- [api.js:48-53](file://frontend/src/api.js#L48-L53)
+- [Dashboard.jsx:6-24](file://frontend/src/components/Dashboard.jsx#L6-L24)
+- [api.js:29](file://frontend/src/api.js#L29)
 
 ### Backend Reporting Endpoints
 The backend provides comprehensive analytics endpoints:
@@ -233,7 +234,7 @@ AIAnalysis --> ReturnData
 ### Data Aggregation Patterns
 The system implements several data aggregation patterns:
 - Bed Occupancy Reports: Six time-based intervals with occupancy percentages
-- Revenue Summaries: Today's revenue calculated from confirmed appointments
+- Revenue Summaries: Today's revenue calculated from confirmed appointments with currency information
 - Patient Outcome Statistics: Success rates derived from department-specific data
 - Compliance Documentation: Standardized department statistics for regulatory reporting
 
@@ -283,12 +284,10 @@ PATIENT ||--o{ VITAL_SIGN : "has"
 ```
 
 **Diagram sources**
-- [models.py:6-75](file://backend/models.py#L6-L75)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 **Section sources**
-- [models.py:6-75](file://backend/models.py#L6-L75)
-- [dashboard.py:12-62](file://backend/routers/dashboard.py#L12-L62)
-- [appointments.py:155-172](file://backend/routers/appointments.py#L155-L172)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 ### Chart-Based Reporting with Recharts
 The Reports component leverages Recharts for visual data presentation:
@@ -318,6 +317,22 @@ Reports-->>Reports : Display Charts with Tooltips
 **Section sources**
 - [Reports.jsx:98-158](file://frontend/src/components/Reports.jsx#L98-L158)
 
+### Enhanced Financial Reporting with Indian Currency Formatting
+**Updated** The financial reporting system now features enhanced currency formatting for improved internationalization and user experience:
+
+- **Indian Currency Display**: Revenue values are displayed with the Rupee symbol (₹) and proper thousands separators using `toLocaleString('en-IN')`
+- **Consistent Formatting**: Both Reports and Dashboard components apply the same formatting for revenue display consistency
+- **Localized Number System**: Uses the Indian numbering system with proper grouping (thousands, lakhs, crores)
+- **Type Safety**: Revenue data maintains integer type while displaying with proper formatting
+- **Backward Compatibility**: Existing API responses remain unchanged, only the frontend display is enhanced
+
+The formatting ensures that revenue figures like 50000 are displayed as ₹50,000, making the data more readable for users in India and other regions using the Indian numbering system.
+
+**Section sources**
+- [Reports.jsx:53](file://frontend/src/components/Reports.jsx#L53)
+- [Dashboard.jsx:104](file://frontend/src/components/Dashboard.jsx#L104)
+- [appointments.py:165-172](file://backend/routers/appointments.py#L165-L172)
+
 ### Report Generation Interface
 The report generation interface supports:
 - Customizable Templates: Reusable chart components with consistent styling
@@ -337,16 +352,16 @@ Automated report generation includes:
 ### Integration with Backend Reporting APIs
 The Reports component integrates with backend APIs through:
 - Dashboard Statistics: Real-time KPI metrics and bed availability
-- Revenue Calculations: Today's revenue based on confirmed appointments
+- Revenue Calculations: Today's revenue based on confirmed appointments with currency information
 - Department Analytics: Comprehensive department performance metrics
 - AI Insights: Automated recommendations and trend analysis
 - Data Filtering: Parameterized queries for date ranges and department filters
 
 **Section sources**
 - [Reports.jsx:16-29](file://frontend/src/components/Reports.jsx#L16-L29)
-- [api.js:48-53](file://frontend/src/api.js#L48-L53)
-- [dashboard.py:12-62](file://backend/routers/dashboard.py#L12-L62)
-- [appointments.py:155-172](file://backend/routers/appointments.py#L155-L172)
+- [Dashboard.jsx:37-62](file://frontend/src/components/Dashboard.jsx#L37-L62)
+- [api.js:29](file://frontend/src/api.js#L29)
+- [appointments.py:155-173](file://backend/routers/appointments.py#L155-L173)
 
 ## Dependency Analysis
 The Reports component exhibits strong cohesion within its domain while maintaining loose coupling with backend services:
@@ -355,6 +370,7 @@ The Reports component exhibits strong cohesion within its domain while maintaini
 - Data Flow: Unidirectional data flow from backend to frontend
 - Error Propagation: Centralized error handling with fallback UI states
 - Performance: Concurrent API calls reduce overall loading time
+- **Enhanced** Internationalization: Proper currency formatting for global accessibility
 
 ```mermaid
 graph LR
@@ -372,24 +388,31 @@ UVICORN["Uvicorn"]
 end
 subgraph "Reports Component"
 FRONTEND["Reports.jsx"]
+DASHBOARD["Dashboard.jsx"]
 BACKEND["Report Endpoints"]
 end
 FRONTEND --> REACT
 FRONTEND --> RECHARTS
 FRONTEND --> AXIOS
+DASHBOARD --> REACT
+DASHBOARD --> RECHARTS
+DASHBOARD --> AXIOS
 BACKEND --> FASTAPI
 BACKEND --> SQLALCHEMY
 BACKEND --> PYDANTIC
 FRONTEND --> BACKEND
+DASHBOARD --> BACKEND
 BACKEND --> UVICORN
 ```
 
 **Diagram sources**
 - [Reports.jsx:1-184](file://frontend/src/components/Reports.jsx#L1-L184)
+- [Dashboard.jsx:1-194](file://frontend/src/components/Dashboard.jsx#L1-L194)
 - [report_endpoints.py:1-252](file://backend/report_endpoints.py#L1-L252)
 
 **Section sources**
 - [Reports.jsx:1-184](file://frontend/src/components/Reports.jsx#L1-L184)
+- [Dashboard.jsx:1-194](file://frontend/src/components/Dashboard.jsx#L1-L194)
 - [report_endpoints.py:1-252](file://backend/report_endpoints.py#L1-L252)
 
 ## Performance Considerations
@@ -398,6 +421,7 @@ BACKEND --> UVICORN
 - Memory Management: Proper cleanup of chart instances prevents memory leaks
 - Network Efficiency: API caching and debounced requests improve responsiveness
 - Scalability: Modular endpoint design allows for easy addition of new report types
+- **Enhanced** Formatting Performance: `toLocaleString('en-IN')` is optimized for client-side rendering and doesn't impact server performance
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -406,10 +430,14 @@ Common issues and resolutions:
 - Performance Bottlenecks: Monitor concurrent API calls and optimize data fetching
 - Export Issues: Validate PDF/CSV generation libraries and permissions
 - Authentication Problems: Ensure proper token handling for secured endpoints
+- **Enhanced** Currency Formatting Issues: Verify browser support for `toLocaleString('en-IN')` and handle fallback scenarios
 
 **Section sources**
 - [Reports.jsx:24-28](file://frontend/src/components/Reports.jsx#L24-L28)
+- [Dashboard.jsx:64-70](file://frontend/src/components/Dashboard.jsx#L64-L70)
 - [api.js:1-10](file://frontend/src/api.js#L1-L10)
 
 ## Conclusion
 The Reports component provides a comprehensive solution for healthcare analytics and reporting, combining real-time data visualization with automated insights generation. Its modular architecture supports extensibility for additional report types, while robust backend APIs ensure reliable data aggregation and delivery. The component's focus on user experience, performance optimization, and security makes it suitable for production deployment in healthcare environments requiring comprehensive reporting capabilities.
+
+**Enhanced** The recent addition of Indian currency formatting significantly improves the internationalization and user experience for users in India and other regions using the Indian numbering system, making financial data more accessible and professional in appearance.
