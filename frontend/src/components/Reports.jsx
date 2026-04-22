@@ -50,7 +50,7 @@ export default function Reports() {
             <DollarSign className="text-green-400" size={24} />
             <span className="text-white/60">Total Revenue</span>
           </div>
-          <p className="text-3xl font-bold text-white">₹{stats?.revenue_today || 0}</p>
+          <p className="text-3xl font-bold text-white">₹{(stats?.revenue_today || 0).toLocaleString('en-IN')}</p>
           <div className="flex items-center gap-1 mt-2 text-green-400">
             <TrendingUp size={16} />
             <span className="text-sm">+15.2%</span>

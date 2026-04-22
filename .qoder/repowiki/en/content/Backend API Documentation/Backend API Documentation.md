@@ -15,7 +15,17 @@
 - [vite.config.js](file://frontend/vite.config.js)
 - [requirements.txt](file://backend/requirements.txt)
 - [README.md](file://README.md)
+- [Procfile](file://Procfile)
+- [DEPLOYMENT.md](file://DEPLOYMENT.md)
+- [DEPLOYMENT_CHECKLIST.md](file://DEPLOYMENT_CHECKLIST.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated CORS middleware configuration section to document wildcard origins support
+- Added production deployment considerations for wildcard origins
+- Enhanced troubleshooting guide with CORS configuration guidance
+- Updated deployment documentation to reflect wildcard origins for production
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -51,7 +61,7 @@ L["Frontend Proxy<br/>vite.config.js"] --> A
 ```
 
 **Diagram sources**
-- [main.py:1-43](file://backend/main.py#L1-L43)
+- [main.py:1-56](file://backend/main.py#L1-L56)
 - [patients.py:1-95](file://backend/routers/patients.py#L1-L95)
 - [appointments.py:1-173](file://backend/routers/appointments.py#L1-L173)
 - [doctors.py:1-70](file://backend/routers/doctors.py#L1-L70)
@@ -59,10 +69,10 @@ L["Frontend Proxy<br/>vite.config.js"] --> A
 - [dashboard.py:1-81](file://backend/routers/dashboard.py#L1-L81)
 - [database.py:1-20](file://backend/database.py#L1-L20)
 - [models.py:1-75](file://backend/models.py#L1-L75)
-- [vite.config.js:1-16](file://frontend/vite.config.js#L1-L16)
+- [vite.config.js:1-17](file://frontend/vite.config.js#L1-L17)
 
 **Section sources**
-- [main.py:1-43](file://backend/main.py#L1-L43)
+- [main.py:1-56](file://backend/main.py#L1-L56)
 - [database.py:1-20](file://backend/database.py#L1-L20)
 - [models.py:1-75](file://backend/models.py#L1-L75)
 - [schemas.py:1-134](file://backend/schemas.py#L1-L134)
@@ -76,14 +86,14 @@ L["Frontend Proxy<br/>vite.config.js"] --> A
 - Frontend Integration: Axios client configured with base URL and proxy for local development.
 
 Key implementation references:
-- Application and CORS setup: [main.py:9-29](file://backend/main.py#L9-L29)
+- Application and CORS setup: [main.py:17-35](file://backend/main.py#L17-L35)
 - Database engine and session: [database.py:5-19](file://backend/database.py#L5-L19)
 - Models definition: [models.py:6-75](file://backend/models.py#L6-L75)
 - Pydantic schemas: [schemas.py:6-134](file://backend/schemas.py#L6-L134)
 - Frontend API client: [api.js:3-55](file://frontend/src/api.js#L3-L55)
 
 **Section sources**
-- [main.py:9-29](file://backend/main.py#L9-L29)
+- [main.py:17-35](file://backend/main.py#L17-L35)
 - [database.py:5-19](file://backend/database.py#L5-L19)
 - [models.py:6-75](file://backend/models.py#L6-L75)
 - [schemas.py:6-134](file://backend/schemas.py#L6-L134)
@@ -124,7 +134,7 @@ H2 --> P1
 ```
 
 **Diagram sources**
-- [main.py:24-29](file://backend/main.py#L24-L29)
+- [main.py:37-42](file://backend/main.py#L37-L42)
 - [patients.py:11-39](file://backend/routers/patients.py#L11-L39)
 - [appointments.py:53-75](file://backend/routers/appointments.py#L53-L75)
 - [doctors.py:10-26](file://backend/routers/doctors.py#L10-L26)
@@ -138,15 +148,17 @@ H2 --> P1
 
 ### Authentication, CORS, and Rate Limiting
 - Authentication: Not implemented in the current codebase. No authentication middleware or endpoints are present.
-- CORS: Enabled for frontend origins http://localhost:3000 and http://localhost:5173 with credentials, methods, and headers allowed.
+- CORS: Enabled for frontend origins http://localhost:3000 and http://localhost:5173 with credentials, methods, and headers allowed. **Updated**: Production deployments now support wildcard origins ('*') for seamless deployment across different production environments.
 - Rate Limiting: Not implemented in the current codebase.
 
+**Updated** The CORS middleware configuration now includes wildcard origins ('*') specifically designed for production deployments, allowing the API to work seamlessly across various production environments without requiring specific origin configurations.
+
 References:
-- CORS configuration: [main.py:15-22](file://backend/main.py#L15-L22)
+- CORS configuration: [main.py:24-35](file://backend/main.py#L24-L35)
 - Frontend proxy configuration: [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
 
 **Section sources**
-- [main.py:15-22](file://backend/main.py#L15-L22)
+- [main.py:24-35](file://backend/main.py#L24-L35)
 - [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
 
 ### Database Session Management and Dependency Injection
@@ -434,7 +446,7 @@ References:
 
 #### Additional Endpoints
 - GET /api/health: Health check endpoint returning service status and timestamp.
-- GET /api/appointments/revenue/today: Today’s revenue calculation based on confirmed appointments.
+- GET /api/appointments/revenue/today: Today's revenue calculation based on confirmed appointments.
 
 References:
 - Health check: [dashboard.py:73-80](file://backend/routers/dashboard.py#L73-L80)
@@ -573,7 +585,7 @@ DASH --> SCH
 
 **Diagram sources**
 - [requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
-- [main.py:24-29](file://backend/main.py#L24-L29)
+- [main.py:37-42](file://backend/main.py#L37-L42)
 - [patients.py:1-8](file://backend/routers/patients.py#L1-L8)
 - [appointments.py:1-8](file://backend/routers/appointments.py#L1-L8)
 - [doctors.py:1-7](file://backend/routers/doctors.py#L1-L7)
@@ -585,7 +597,7 @@ DASH --> SCH
 
 **Section sources**
 - [requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
-- [main.py:24-29](file://backend/main.py#L24-L29)
+- [main.py:37-42](file://backend/main.py#L37-L42)
 - [database.py:1-20](file://backend/database.py#L1-L20)
 - [models.py:1-75](file://backend/models.py#L1-L75)
 - [schemas.py:1-134](file://backend/schemas.py#L1-L134)
@@ -600,13 +612,12 @@ DASH --> SCH
   - Apply filters early to reduce database load.
   - Consider adding database indexes for frequently filtered columns if growth warrants.
 
-[No sources needed since this section provides general guidance]
-
 ## Troubleshooting Guide
 - CORS Issues:
   - Ensure frontend origin is included in allowed origins.
   - Confirm credentials and headers are allowed.
-  - References: [main.py:15-22](file://backend/main.py#L15-L22), [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
+  - **Updated**: For production deployments, wildcard origins ('*') are supported to enable seamless deployment across different production environments.
+  - References: [main.py:24-35](file://backend/main.py#L24-L35), [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
 - Database Connectivity:
   - Verify SQLite file path and permissions.
   - Confirm engine creation and session factory setup.
@@ -622,7 +633,7 @@ DASH --> SCH
   - References: [appointments.py:88-91](file://backend/routers/appointments.py#L88-L91)
 
 **Section sources**
-- [main.py:15-22](file://backend/main.py#L15-L22)
+- [main.py:24-35](file://backend/main.py#L24-L35)
 - [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
 - [database.py:5-19](file://backend/database.py#L5-L19)
 - [patients.py:44-46](file://backend/routers/patients.py#L44-L46)
@@ -636,7 +647,7 @@ DASH --> SCH
 ## Conclusion
 The Smart Healthcare Dashboard backend provides a robust, modular API with strong validation, clear data contracts, and straightforward integration patterns. It supports essential healthcare operations including patient, doctor, appointment, and vitals management, along with dashboard analytics and recent activity feeds. The current implementation lacks authentication and rate limiting, which can be introduced in future iterations.
 
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated**: The expanded CORS middleware configuration with wildcard origins ('*') enables seamless deployment across different production environments, particularly beneficial for cloud platforms like Render and Vercel where the frontend URL may vary or be dynamically assigned.
 
 ## Appendices
 
@@ -655,10 +666,19 @@ The Smart Healthcare Dashboard backend provides a robust, modular API with stron
   - GET /api/health
   - GET /api/appointments/revenue/today
 
+**Updated**: Production deployment considerations:
+- Wildcard origins ('*') are enabled for seamless deployment across various production environments
+- For cloud platforms like Render and Vercel, the wildcard configuration allows dynamic frontend URLs
+- When deploying to specific production domains, consider restricting origins to improve security
+
 References:
 - Endpoints overview: [README.md:153-164](file://README.md#L153-L164)
 - Frontend proxy: [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
+- Deployment configuration: [Procfile:1](file://Procfile#L1)
+- Deployment guide: [DEPLOYMENT.md:90-105](file://DEPLOYMENT.md#L90-L105)
 
 **Section sources**
 - [README.md:153-164](file://README.md#L153-L164)
 - [vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
+- [Procfile:1](file://Procfile#L1)
+- [DEPLOYMENT.md:90-105](file://DEPLOYMENT.md#L90-L105)

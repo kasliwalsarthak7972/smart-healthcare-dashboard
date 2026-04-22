@@ -101,7 +101,7 @@ export default function Dashboard() {
         <StatCard
           icon={DollarSign}
           title="Revenue Today"
-          value={`₹${stats?.revenue_today || 0}`}
+          value={`₹${(stats?.revenue_today || 0).toLocaleString('en-IN')}`}
           change={15.2}
           color="bg-purple-500"
         />

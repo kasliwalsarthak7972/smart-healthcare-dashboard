@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Plus } from 'lucide-react'
 import { patientsAPI } from '../api'
+import AddPatientModal from './AddPatientModal'
 
 export default function Patients() {
   const [patients, setPatients] = useState([])
@@ -8,6 +9,7 @@ export default function Patients() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [conditionFilter, setConditionFilter] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
 
   useEffect(() => {
     loadPatients()
@@ -26,6 +28,18 @@ export default function Patients() {
       console.error('Error loading patients:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeletePatient = async (patientId) => {
+    if (!confirm('Are you sure you want to delete this patient?')) return
+    
+    try {
+      await patientsAPI.delete(patientId)
+      loadPatients()
+    } catch (error) {
+      console.error('Error deleting patient:', error)
+      alert('Failed to delete patient')
     }
   }
 
@@ -71,7 +85,10 @@ export default function Patients() {
             <option value="Orthopedic">Orthopedic</option>
             <option value="General">General</option>
           </select>
-          <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+          >
             <Plus size={20} />
             Add Patient
           </button>
@@ -106,6 +123,14 @@ export default function Patients() {
                         {patient.status}
                       </span>
                     </td>
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => handleDeletePatient(patient.id)}
+                        className="px-3 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg text-sm transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -113,6 +138,12 @@ export default function Patients() {
           </div>
         </div>
       )}
+
+      <AddPatientModal 
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onPatientAdded={loadPatients}
+      />
     </div>
   )
 }

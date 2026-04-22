@@ -14,7 +14,15 @@
 - [frontend/vite.config.js](file://frontend/vite.config.js)
 - [frontend/src/api.js](file://frontend/src/api.js)
 - [.github/workflows/static.yml](file://.github/workflows/static.yml)
+- [Procfile](file://Procfile)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated environment variable configuration section to document the new `import.meta.env.VITE_API_URL` feature
+- Added comprehensive environment variable handling documentation for both development and production
+- Enhanced deployment configuration examples with VITE_API_URL usage
+- Updated platform-specific deployment instructions to include environment variable setup
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -22,19 +30,20 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Security Considerations](#security-considerations)
-9. [Monitoring, Logging, and Error Tracking](#monitoring-logging-and-error-tracking)
-10. [Rollback, Backup, and Disaster Recovery](#rollback-backup-and-disaster-recovery)
-11. [Conclusion](#conclusion)
-12. [Appendices](#appendices)
+6. [Environment Variable Configuration](#environment-variable-configuration)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Security Considerations](#security-considerations)
+10. [Monitoring, Logging, and Error Tracking](#monitoring-logging-and-error-tracking)
+11. [Rollback, Backup, and Disaster Recovery](#rollback-backup-and-disaster-recovery)
+12. [Conclusion](#conclusion)
+13. [Appendices](#appendices)
 
 ## Introduction
 This document provides production deployment guidance for the Smart Healthcare Dashboard across Render, Railway, and Vercel. It covers platform-specific configuration, environment variables, build and startup commands, CI/CD workflows, performance optimization, security hardening, observability, and operational resilience practices. The system comprises a FastAPI backend and a React/Vite frontend, with SQLite for persistence during development and pathways for production-grade databases.
 
 ## Project Structure
-The repository follows a monorepo-like layout with a backend and a frontend directory. The backend exposes REST endpoints via FastAPI, while the frontend consumes those endpoints through an Axios client configured for local proxying during development.
+The repository follows a monorepo-like layout with a backend and a frontend directory. The backend exposes REST endpoints via FastAPI, while the frontend consumes those endpoints through an Axios client configured for local proxying during development and environment variable-driven configuration in production.
 
 ```mermaid
 graph TB
@@ -50,12 +59,14 @@ subgraph "Frontend"
 FPkg["frontend/package.json"]
 FVite["frontend/vite.config.js"]
 FAxios["frontend/src/api.js"]
+FEnv["frontend/.env*"]
 end
 subgraph "CI/CD"
 GW["GitHub Workflows<br/>.github/workflows/static.yml"]
 end
 FPkg --> FVite
 FVite --> FAxios
+FAxios --> FEnv
 BM --> BR
 BM --> BD
 BM --> BReq
@@ -66,7 +77,7 @@ GW --> BM
 ```
 
 **Diagram sources**
-- [backend/main.py:1-43](file://backend/main.py#L1-L43)
+- [backend/main.py:1-56](file://backend/main.py#L1-L56)
 - [backend/database.py:1-20](file://backend/database.py#L1-L20)
 - [backend/requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
 - [backend/routers/dashboard.py:1-81](file://backend/routers/dashboard.py#L1-L81)
@@ -75,12 +86,12 @@ GW --> BM
 - [backend/schemas.py:1-134](file://backend/schemas.py#L1-L134)
 - [frontend/package.json:1-34](file://frontend/package.json#L1-L34)
 - [frontend/vite.config.js:1-17](file://frontend/vite.config.js#L1-L17)
-- [frontend/src/api.js:1-56](file://frontend/src/api.js#L1-L56)
+- [frontend/src/api.js:1-57](file://frontend/src/api.js#L1-L57)
 - [.github/workflows/static.yml:1-44](file://.github/workflows/static.yml#L1-L44)
 
 **Section sources**
 - [README.md:106-136](file://README.md#L106-L136)
-- [backend/main.py:1-43](file://backend/main.py#L1-L43)
+- [backend/main.py:1-56](file://backend/main.py#L1-L56)
 - [frontend/package.json:1-34](file://frontend/package.json#L1-L34)
 - [.github/workflows/static.yml:1-44](file://.github/workflows/static.yml#L1-L44)
 
@@ -93,8 +104,9 @@ GW --> BM
   - Health endpoint: /api/health
 - Frontend service
   - Framework: React 18 with Vite
-  - HTTP client: Axios
+  - HTTP client: Axios with configurable base URL
   - Dev proxy: /api -> http://localhost:5000
+  - Environment variable support: VITE_API_URL for production API configuration
 - CI/CD
   - GitHub Actions workflow for static content deployment
 
@@ -103,21 +115,22 @@ Key production considerations:
 - Platform-specific build/start commands and environment configuration
 - CORS policy adjustments for production domains
 - Database migration and seeding strategies
+- Configurable API base URL through VITE_API_URL environment variable
 
 **Section sources**
-- [backend/main.py:1-43](file://backend/main.py#L1-L43)
+- [backend/main.py:1-56](file://backend/main.py#L1-L56)
 - [backend/database.py:1-20](file://backend/database.py#L1-L20)
 - [backend/requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
 - [backend/routers/dashboard.py:73-81](file://backend/routers/dashboard.py#L73-L81)
 - [frontend/vite.config.js:7-16](file://frontend/vite.config.js#L7-L16)
-- [frontend/src/api.js:3](file://frontend/src/api.js#L3)
+- [frontend/src/api.js:3-4](file://frontend/src/api.js#L3-L4)
 
 ## Architecture Overview
-The production architecture separates the backend API server and the frontend static site. The frontend is served statically (e.g., Vercel) while the backend is deployed behind a reverse proxy or containerized with an ASGI server. The backend connects to a persistent database (SQLite in development; PostgreSQL recommended for production).
+The production architecture separates the backend API server and the frontend static site. The frontend is served statically (e.g., Vercel) while the backend is deployed behind a reverse proxy or containerized with an ASGI server. The backend connects to a persistent database (SQLite in development; PostgreSQL recommended for production). The frontend uses a configurable API base URL that can be overridden via environment variables for different deployment environments.
 
 ```mermaid
 graph TB
-Client["Browser / Client Apps"] --> FE["Frontend (Static Site)"]
+Client["Browser / Client Apps"] --> FE["Frontend (Static Site)<br/>VITE_API_URL configurable"]
 FE --> APIProxy["Frontend Dev Proxy / API Gateway"]
 APIProxy --> BE["Backend API (FastAPI/Uvicorn)"]
 BE --> DB["Database (SQLite in repo; PostgreSQL in prod)"]
@@ -130,7 +143,7 @@ BE -. "Container/Service" .-> Railway["Railway Project"]
 - [backend/main.py:15-22](file://backend/main.py#L15-L22)
 - [backend/database.py:5](file://backend/database.py#L5)
 - [frontend/vite.config.js:9-14](file://frontend/vite.config.js#L9-L14)
-- [frontend/src/api.js:3](file://frontend/src/api.js#L3)
+- [frontend/src/api.js:3-4](file://frontend/src/api.js#L3-L4)
 
 ## Detailed Component Analysis
 
@@ -163,7 +176,7 @@ FE-->>Client : "Render dashboard"
 - [backend/database.py:7-9](file://backend/database.py#L7-L9)
 
 **Section sources**
-- [backend/main.py:1-43](file://backend/main.py#L1-L43)
+- [backend/main.py:1-56](file://backend/main.py#L1-L56)
 - [backend/database.py:1-20](file://backend/database.py#L1-L20)
 - [backend/requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
 - [backend/routers/dashboard.py:12-81](file://backend/routers/dashboard.py#L12-L81)
@@ -173,26 +186,27 @@ FE-->>Client : "Render dashboard"
   - Scripts include dev, build, lint, and preview.
 - Dev proxy
   - Proxies /api requests to the backend running on localhost:5000.
-- API base URL
-  - Axios client configured to http://localhost:5000 during development.
+- API base URL configuration
+  - Axios client configured with environment variable support for production deployments.
+  - Uses `import.meta.env.VITE_API_URL` with fallback to production Render backend URL.
 
 ```mermaid
 flowchart TD
 Start(["Dev Server"]) --> Proxy["Vite Dev Server<br/>proxy '/api' -> http://localhost:5000"]
-Proxy --> Axios["Frontend Axios Client<br/>baseURL: http://localhost:5000"]
+Proxy --> Axios["Frontend Axios Client<br/>baseURL: import.meta.env.VITE_API_URL || fallback URL"]
 Axios --> Backend["Backend API"]
 Backend --> DB["SQLite Database"]
 ```
 
 **Diagram sources**
 - [frontend/vite.config.js:7-16](file://frontend/vite.config.js#L7-L16)
-- [frontend/src/api.js:3](file://frontend/src/api.js#L3)
+- [frontend/src/api.js:3-4](file://frontend/src/api.js#L3-L4)
 - [backend/database.py:5](file://backend/database.py#L5)
 
 **Section sources**
 - [frontend/package.json:6-11](file://frontend/package.json#L6-L11)
 - [frontend/vite.config.js:1-17](file://frontend/vite.config.js#L1-L17)
-- [frontend/src/api.js:1-56](file://frontend/src/api.js#L1-L56)
+- [frontend/src/api.js:1-57](file://frontend/src/api.js#L1-L57)
 
 ### CI/CD Pipeline
 - Current workflow
@@ -220,10 +234,61 @@ Pages-->>Dev : "Site available at Pages URL"
 **Section sources**
 - [.github/workflows/static.yml:1-44](file://.github/workflows/static.yml#L1-L44)
 
+## Environment Variable Configuration
+
+### Frontend Environment Variables
+The frontend now supports configurable API base URL through Vite's environment variable system:
+
+- **VITE_API_URL**: Primary environment variable for API base URL
+  - Can be set during build or deployment
+  - Overrides the hardcoded fallback URL
+  - Supports different API endpoints for development, staging, and production
+
+- **Development fallback**: Automatically falls back to production Render backend URL if VITE_API_URL is not set
+
+### Environment Variable Handling Process
+
+```mermaid
+flowchart TD
+EnvCheck["Check VITE_API_URL"] --> HasVar{"VITE_API_URL set?"}
+HasVar --> |Yes| UseVar["Use VITE_API_URL as API base URL"]
+HasVar --> |No| UseFallback["Use fallback production URL"]
+UseVar --> Axios["Configure Axios with VITE_API_URL"]
+UseFallback --> Axios
+Axios --> App["Frontend Application"]
+```
+
+**Diagram sources**
+- [frontend/src/api.js:3-4](file://frontend/src/api.js#L3-L4)
+
+### Platform-Specific Environment Variable Setup
+
+#### Render Platform
+- Backend environment variables:
+  - `DATABASE_URL`: PostgreSQL connection string (production)
+  - `BACKEND_PORT`: Port binding (uses `$PORT` automatically)
+- Frontend environment variables (if using separate frontend deployment):
+  - `VITE_API_URL`: Set to your Render backend URL
+
+#### Railway Platform
+- Automatic environment variable detection
+- Supports standard environment variable injection
+- `VITE_API_URL` can be configured in Railway's environment settings
+
+#### Vercel Platform
+- Frontend-only deployment with environment variables
+- `VITE_API_URL` should be set to your Render backend URL
+- Environment variables configured in Vercel dashboard
+
+**Section sources**
+- [frontend/src/api.js:3-4](file://frontend/src/api.js#L3-L4)
+- [Procfile:1](file://Procfile#L1)
+
 ## Dependency Analysis
 - Backend dependencies include FastAPI, Uvicorn, SQLAlchemy, Alembic, and Faker.
 - Frontend dependencies include React, Vite, TailwindCSS, Recharts, Lucide React, and Axios.
 - The backend defines a SQLite database URL and creates tables on startup.
+- The frontend uses environment variables for flexible API configuration.
 
 ```mermaid
 graph LR
@@ -241,6 +306,7 @@ V["Vite"]
 T["TailwindCSS"]
 RC["Recharts"]
 AX["Axios"]
+ENV["VITE_API_URL"]
 end
 A --> S
 A --> U
@@ -248,12 +314,14 @@ S --> AL
 R --> AX
 V --> T
 R --> RC
+AX --> ENV
 ```
 
 **Diagram sources**
 - [backend/requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
 - [frontend/package.json:12-19](file://frontend/package.json#L12-L19)
 - [frontend/package.json:20-32](file://frontend/package.json#L20-L32)
+- [frontend/src/api.js:3-4](file://frontend/src/api.js#L3-L4)
 
 **Section sources**
 - [backend/requirements.txt:1-9](file://backend/requirements.txt#L1-L9)
@@ -261,7 +329,7 @@ R --> RC
 
 ## Performance Considerations
 - Build optimization
-  - Use Vite’s production build for the frontend.
+  - Use Vite's production build for the frontend.
   - Enable minification and tree-shaking via Vite defaults.
 - Caching strategies
   - Frontend: leverage browser caching for static assets; configure cache headers on hosting provider.
@@ -274,8 +342,6 @@ R --> RC
   - Consider indexing frequently filtered columns (e.g., patient status, admission date).
 - Asynchronous tasks
   - Offload heavy computations (e.g., report generation) to background workers.
-
-[No sources needed since this section provides general guidance]
 
 ## Security Considerations
 - HTTPS configuration
@@ -290,6 +356,9 @@ R --> RC
 - API security
   - Add rate limiting, input validation, and sanitization.
   - Consider authentication/authorization for admin endpoints.
+- Environment variable security
+  - Never expose sensitive API keys in frontend code.
+  - Use platform-specific secret management for production deployments.
 
 **Section sources**
 - [backend/main.py:15-22](file://backend/main.py#L15-L22)
@@ -317,41 +386,59 @@ R --> RC
 - Disaster recovery
   - Define RTO/RPO targets and automate failover to secondary regions or providers.
 
-[No sources needed since this section provides general guidance]
-
 ## Conclusion
-This guide outlines production deployment for the Smart Healthcare Dashboard across Render, Railway, and Vercel. It emphasizes platform-specific configuration, environment variable management, build/start commands, CORS hardening, database migration, performance optimization, security, observability, and operational resilience. Adopt the recommended practices to achieve reliable, secure, and scalable production delivery.
-
-[No sources needed since this section summarizes without analyzing specific files]
+This guide outlines production deployment for the Smart Healthcare Dashboard across Render, Railway, and Vercel. It emphasizes platform-specific configuration, environment variable management, build/start commands, CORS hardening, database migration, performance optimization, security, observability, and operational resilience. The new environment variable configuration feature provides flexible API base URL management for different deployment environments, enhancing the system's adaptability to various production scenarios.
 
 ## Appendices
 
 ### Platform-Specific Deployment Recipes
 
-- Render
-  - Backend
-    - Build command: cd frontend && npm install && npm run build
-    - Start command: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
-    - Python version: 3.11
-  - Frontend
-    - Root directory: frontend
-- Railway
-  - Auto-detection applies; ensure requirements.txt and package.json are present.
-- Vercel
-  - Import repository and set root to frontend; deploy static site.
+#### Render
+- Backend
+  - Build command: `cd frontend && npm install && npm run build`
+  - Start command: `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
+  - Python version: 3.11
+  - Environment variables:
+    - `DATABASE_URL`: PostgreSQL connection string
+    - `BACKEND_PORT`: Uses `$PORT` automatically
+- Frontend
+  - Root directory: frontend
+  - Environment variables:
+    - `VITE_API_URL`: Set to your Render backend URL
 
-Environment variables to define (examples):
-- BACKEND_PORT (use $PORT on Render/Railway)
-- DATABASE_URL (PostgreSQL URL in production)
-- FRONTEND_PRODUCTION_URL (for CORS origins)
-- SECRET_KEY (for sessions or signing if added later)
+#### Railway
+- Auto-detection applies; ensure requirements.txt and package.json are present.
+- Environment variables:
+  - `DATABASE_URL`: PostgreSQL connection string
+  - `VITE_API_URL`: Set to your backend URL if using separate frontend deployment
 
-Build and startup commands summary:
-- Backend: uvicorn main:app --host 0.0.0.0 --port $PORT
-- Frontend: npm run build
+#### Vercel
+- Import repository and set root to frontend; deploy static site.
+- Environment variables:
+  - `VITE_API_URL`: Set to your Render backend URL
+  - `NEXT_PUBLIC_API_URL`: Alternative for Next.js deployments
 
-**Section sources**
-- [README.md:166-194](file://README.md#L166-L194)
+### Environment Variable Configuration Examples
+
+#### Development Environment
+```bash
+# .env.development
+VITE_API_URL=http://localhost:5000
+```
+
+#### Production Environment (Render)
+```bash
+# Render environment variables
+VITE_API_URL=https://your-app.onrender.com
+DATABASE_URL=postgresql://user:pass@host:5432/dbname
+```
+
+#### Staging Environment (Railway)
+```bash
+# Railway environment variables
+VITE_API_URL=https://staging-api.your-app.onrender.com
+DATABASE_URL=postgresql://user:pass@host:5432/staging_db
+```
 
 ### API Surface and Endpoints
 - Health: GET /api/health

@@ -2,11 +2,12 @@
 
 <cite>
 **Referenced Files in This Document**
+- [main.py](file://backend/main.py)
+- [init_db.py](file://backend/init_db.py)
+- [database.py](file://backend/database.py)
 - [models.py](file://backend/models.py)
 - [schemas.py](file://backend/schemas.py)
-- [database.py](file://backend/database.py)
 - [seed_data.py](file://backend/seed_data.py)
-- [main.py](file://backend/main.py)
 - [patients.py](file://backend/routers/patients.py)
 - [doctors.py](file://backend/routers/doctors.py)
 - [appointments.py](file://backend/routers/appointments.py)
@@ -16,34 +17,46 @@
 - [README.md](file://README.md)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated Database Initialization section to reflect the new automatic database initialization system
+- Added comprehensive coverage of the intelligent duplicate prevention mechanism
+- Enhanced the Architecture Overview to show the new startup lifecycle
+- Updated troubleshooting guide to address the new initialization process
+- Added new section on Automatic Database Management
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
-5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+5. [Automatic Database Management System](#automatic-database-management-system)
+6. [Detailed Component Analysis](#detailed-component-analysis)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
+11. [Appendices](#appendices)
 
 ## Introduction
-This document provides comprehensive data model documentation for the Smart Healthcare Dashboard database schema. It details the entity relationships among Patient, Doctor, Appointment, and VitalSign, along with their fields, data types, constraints, and indexing strategies. It also explains the SQLAlchemy ORM model definitions, Pydantic schema validations for serialization/deserialization, database initialization and seeding procedures, and the relationship patterns and cascading behaviors. Finally, it outlines data integrity constraints, validation rules, business logic enforcement, and examples of complex queries, joins, and aggregations used in dashboard analytics.
+This document provides comprehensive data model documentation for the Smart Healthcare Dashboard database schema. It details the entity relationships among Patient, Doctor, Appointment, and VitalSign, along with their fields, data types, constraints, and indexing strategies. The system now features an intelligent automatic database initialization system that runs on application startup, eliminating the need for manual database setup and providing intelligent duplicate prevention checks.
 
 ## Project Structure
-The backend follows a layered architecture:
-- Database layer: SQLAlchemy declarative base and engine configuration
+The backend follows a layered architecture with automatic database management:
+- Database layer: SQLAlchemy declarative base and engine configuration with automatic initialization
 - Models layer: ORM entities and relationships
 - Schemas layer: Pydantic models for request/response validation
 - Routers layer: FastAPI endpoints implementing CRUD and analytics
-- Application entrypoint: FastAPI app creation and table initialization
+- Application entrypoint: FastAPI app with automatic database lifecycle management
 
 ```mermaid
 graph TB
-subgraph "Application Layer"
-APP["FastAPI App<br/>main.py"]
-end
+subgraph "Application Lifecycle"
+LIFESPAN["FastAPI Lifespan<br/>main.py"]
+INIT_DB["Database Initialization<br/>init_db.py"]
+SEED_CHECK["Intelligent Seeding Check<br/>init_db.py"]
+SEED_SCRIPT["Standalone Seed Script<br/>seed_data.py"]
+END
 subgraph "Routers"
 PAT["Patients Router<br/>routers/patients.py"]
 DOC["Doctors Router<br/>routers/doctors.py"]
@@ -55,13 +68,11 @@ subgraph "Data Layer"
 DB["Database Engine & Session<br/>database.py"]
 MODELS["ORM Models<br/>models.py"]
 SCHEMAS["Pydantic Schemas<br/>schemas.py"]
-SEED["Seed Data Script<br/>seed_data.py"]
 end
-APP --> PAT
-APP --> DOC
-APP --> APPNT
-APP --> VIT
-APP --> DASH
+LIFESPAN --> INIT_DB
+INIT_DB --> SEED_CHECK
+SEED_CHECK --> SEED_SCRIPT
+SEED_SCRIPT --> MODELS
 PAT --> DB
 DOC --> DB
 APPNT --> DB
@@ -77,34 +88,23 @@ DOC --> SCHEMAS
 APPNT --> SCHEMAS
 VIT --> SCHEMAS
 DASH --> SCHEMAS
-APP -.-> SEED
-SEED --> MODELS
-SEED --> DB
 ```
 
 **Diagram sources**
-- [main.py:1-43](file://backend/main.py#L1-L43)
+- [main.py:8-15](file://backend/main.py#L8-L15)
+- [init_db.py:4-24](file://backend/init_db.py#L4-L24)
+- [seed_data.py:6-134](file://backend/seed_data.py#L6-L134)
 - [database.py:1-20](file://backend/database.py#L1-L20)
 - [models.py:1-75](file://backend/models.py#L1-L75)
 - [schemas.py:1-134](file://backend/schemas.py#L1-L134)
-- [seed_data.py:1-138](file://backend/seed_data.py#L1-L138)
-- [patients.py:1-95](file://backend/routers/patients.py#L1-L95)
-- [doctors.py:1-70](file://backend/routers/doctors.py#L1-L70)
-- [appointments.py:1-173](file://backend/routers/appointments.py#L1-L173)
-- [vitals.py:1-72](file://backend/routers/vitals.py#L1-L72)
-- [dashboard.py:1-81](file://backend/routers/dashboard.py#L1-L81)
 
 **Section sources**
-- [main.py:1-43](file://backend/main.py#L1-L43)
+- [main.py:1-56](file://backend/main.py#L1-L56)
+- [init_db.py:1-25](file://backend/init_db.py#L1-L25)
 - [database.py:1-20](file://backend/database.py#L1-L20)
 - [models.py:1-75](file://backend/models.py#L1-L75)
 - [schemas.py:1-134](file://backend/schemas.py#L1-L134)
 - [seed_data.py:1-138](file://backend/seed_data.py#L1-L138)
-- [patients.py:1-95](file://backend/routers/patients.py#L1-L95)
-- [doctors.py:1-70](file://backend/routers/doctors.py#L1-L70)
-- [appointments.py:1-173](file://backend/routers/appointments.py#L1-L173)
-- [vitals.py:1-72](file://backend/routers/vitals.py#L1-L72)
-- [dashboard.py:1-81](file://backend/routers/dashboard.py#L1-L81)
 
 ## Core Components
 This section documents the core entities and their attributes, constraints, and relationships.
@@ -147,35 +147,87 @@ Constraints and defaults:
 - [appointments.py:84-125](file://backend/routers/appointments.py#L84-L125)
 
 ## Architecture Overview
-The system uses FastAPI with SQLAlchemy ORM and Pydantic validation. The application initializes database tables at startup, exposes REST endpoints for CRUD operations and analytics, and seeds initial data for demonstration.
+The system uses FastAPI with SQLAlchemy ORM and Pydantic validation. The application now features an automatic database initialization system that runs on startup, eliminating manual intervention while providing intelligent duplicate prevention checks. The system exposes REST endpoints for CRUD operations and analytics with automatic database lifecycle management.
 
 ```mermaid
 sequenceDiagram
 participant Client as "Client"
 participant API as "FastAPI App<br/>main.py"
-participant Router as "Router (e.g., appointments.py)"
+participant Lifespan as "Startup Lifespan<br/>main.py"
+participant InitDB as "Database Init<br/>init_db.py"
+participant SeedCheck as "Seeding Check<br/>init_db.py"
 participant DB as "Database Engine<br/>database.py"
 participant Models as "ORM Models<br/>models.py"
 Client->>API : "HTTP Request"
-API->>Router : "Route to endpoint"
-Router->>DB : "Open session and query"
-DB->>Models : "Execute ORM query"
-Models-->>DB : "Mapped objects"
-DB-->>Router : "Results"
-Router-->>API : "Pydantic validated response"
+API->>Lifespan : "Application startup"
+Lifespan->>InitDB : "Call init_db()"
+InitDB->>SeedCheck : "Check if database empty"
+SeedCheck->>DB : "Query patient count"
+DB-->>SeedCheck : "Count result"
+SeedCheck->>InitDB : "Empty? True/False"
+InitDB->>DB : "Create tables if not exist"
+InitDB->>SeedCheck : "Seed if empty"
+SeedCheck->>DB : "Insert seed data"
+DB-->>API : "Ready for requests"
 API-->>Client : "JSON response"
 ```
 
 **Diagram sources**
-- [main.py:1-43](file://backend/main.py#L1-L43)
+- [main.py:8-15](file://backend/main.py#L8-L15)
+- [init_db.py:4-24](file://backend/init_db.py#L4-L24)
 - [database.py:14-19](file://backend/database.py#L14-L19)
-- [appointments.py:53-75](file://backend/routers/appointments.py#L53-L75)
 - [models.py:36-50](file://backend/models.py#L36-L50)
 
 **Section sources**
 - [main.py:6-7](file://backend/main.py#L6-L7)
 - [database.py:1-20](file://backend/database.py#L1-L20)
 - [models.py:1-3](file://backend/models.py#L1-L3)
+
+## Automatic Database Management System
+
+### Startup Lifecycle
+The application now automatically manages database initialization through FastAPI's lifespan context manager. On application startup, the system performs the following sequence:
+
+1. **Engine Creation**: Database engine configured for SQLite with local file storage
+2. **Table Creation**: All ORM models are automatically created if they don't exist
+3. **Intelligent Seeding**: Database is checked for existing data before seeding
+4. **Session Management**: Proper session lifecycle management for all operations
+
+### Intelligent Duplicate Prevention
+The system implements multiple layers of duplicate prevention:
+
+- **Startup Check**: Database initialization checks for existing patient records before seeding
+- **Manual Seed Script**: Standalone seed script prevents duplicate execution
+- **Business Logic**: Patient creation prevents duplicate combinations of name and room
+- **Appointment Validation**: Time slot conflicts are prevented through database queries
+
+### Database Initialization Process
+```mermaid
+flowchart TD
+Start(["Application Start"]) --> Lifespan["FastAPI Lifespan Context"]
+Lifespan --> InitDB["init_db() Function"]
+InitDB --> CreateTables["Create All Tables"]
+CreateTables --> CheckData{"Any Existing Data?"}
+CheckData --> |No| SeedData["Seed Initial Data"]
+CheckData --> |Yes| SkipSeed["Skip Seeding"]
+SeedData --> CreatePatients["Create 10 Test Patients"]
+CreatePatients --> CreateDoctors["Create 5 Test Doctors"]
+CreateDoctors --> CreateAppointments["Create 20 Test Appointments"]
+CreateAppointments --> CreateVitals["Create 24 Hour Vitals for Each Patient"]
+CreateVitals --> CreateActivities["Create Recent Activity Feed"]
+CreateActivities --> Complete["Initialization Complete"]
+SkipSeed --> Complete
+```
+
+**Diagram sources**
+- [main.py:8-15](file://backend/main.py#L8-L15)
+- [init_db.py:4-24](file://backend/init_db.py#L4-L24)
+- [seed_data.py:6-134](file://backend/seed_data.py#L6-L134)
+
+**Section sources**
+- [main.py:8-15](file://backend/main.py#L8-L15)
+- [init_db.py:4-24](file://backend/init_db.py#L4-L24)
+- [seed_data.py:6-134](file://backend/seed_data.py#L6-L134)
 
 ## Detailed Component Analysis
 
@@ -283,42 +335,6 @@ Validation highlights:
 - [schemas.py:109-122](file://backend/schemas.py#L109-L122)
 - [schemas.py:125-134](file://backend/schemas.py#L125-L134)
 
-### Database Initialization and Seeding
-- Initialization:
-  - Engine configured for SQLite with a local file database
-  - Tables created at application startup
-  - Session factory and dependency injection for route handlers
-- Seeding:
-  - Creates tables if not present
-  - Prevents duplicate seeding by checking existing records
-  - Generates realistic test data for:
-    - Patients (with randomized admission dates)
-    - Doctors (with availability and counts)
-    - Appointments (randomized across time slots and statuses)
-    - Vital signs (hourly measurements for 24 hours per patient)
-    - Activities (categorized events with timestamps)
-
-```mermaid
-flowchart TD
-Start(["Start"]) --> Init["Initialize engine and Base"]
-Init --> CreateTables["Create tables if not exist"]
-CreateTables --> SeedCheck{"Already seeded?"}
-SeedCheck --> |Yes| Skip["Skip seeding"]
-SeedCheck --> |No| Seed["Seed data for patients, doctors, appointments, vitals, activities"]
-Seed --> Done(["Done"])
-Skip --> Done
-```
-
-**Diagram sources**
-- [main.py:6-7](file://backend/main.py#L6-L7)
-- [database.py:1-20](file://backend/database.py#L1-L20)
-- [seed_data.py:6-134](file://backend/seed_data.py#L6-L134)
-
-**Section sources**
-- [main.py:6-7](file://backend/main.py#L6-L7)
-- [database.py:5-12](file://backend/database.py#L5-L12)
-- [seed_data.py:6-134](file://backend/seed_data.py#L6-L134)
-
 ### Business Logic and Validation Rules
 - Patient creation prevents duplicates by name and room
 - Appointment creation validates:
@@ -421,11 +437,40 @@ REQ --> AL
   - Vitals table grows linearly with time; consider partitioning or retention policies for long-term storage
 - Concurrency:
   - Session-per-request pattern ensures thread-safe access to the database
-
-[No sources needed since this section provides general guidance]
+- Automatic Initialization:
+  - Database creation and seeding occurs only once during startup
+  - Subsequent restarts reuse existing database with intelligent duplicate prevention
 
 ## Troubleshooting Guide
-Common issues and resolutions:
+
+### Automatic Initialization Issues
+- **Database not initializing on startup**:
+  - Symptom: Tables not created, application crashes on first request
+  - Resolution: Check FastAPI lifespan configuration in main.py
+  - Verify that the lifespan function is properly decorated with @asynccontextmanager
+
+- **Seeding conflicts during startup**:
+  - Symptom: "Database already seeded" messages or skipped seeding
+  - Resolution: This is expected behavior - the system prevents duplicate seeding
+  - Clear database file if you need fresh data: `rm backend/healthcare.db`
+
+- **Permission errors with database file**:
+  - Symptom: Permission denied when creating healthcare.db
+  - Resolution: Ensure write permissions for the backend directory
+  - Run application with appropriate file system permissions
+
+### Manual Database Management
+- **Force reseeding**:
+  - Delete the existing database file: `rm backend/healthcare.db`
+  - Restart the application to trigger fresh seeding
+  - Note: This will remove all existing data
+
+- **Using standalone seed script**:
+  - Run: `python backend/seed_data.py`
+  - The script checks for existing data and will skip if already seeded
+  - Useful for development environments where you need to reset data
+
+### Common Issues and Resolutions
 - Duplicate patient creation:
   - Symptom: Conflict when creating a patient with the same name and room
   - Resolution: Ensure unique combinations or adjust business rules
@@ -435,20 +480,17 @@ Common issues and resolutions:
 - Missing entities:
   - Symptom: 404 errors when retrieving patients/doctor/appointments
   - Resolution: Confirm entity existence before performing operations
-- Seeding conflicts:
-  - Symptom: Seeding script skips when data exists
-  - Resolution: Clear database or remove seeding guard if reseeding is intended
 
 **Section sources**
+- [main.py:8-15](file://backend/main.py#L8-L15)
+- [init_db.py:13-20](file://backend/init_db.py#L13-L20)
+- [seed_data.py:13-16](file://backend/seed_data.py#L13-L16)
 - [patients.py:48-66](file://backend/routers/patients.py#L48-L66)
 - [appointments.py:84-125](file://backend/routers/appointments.py#L84-L125)
 - [vitals.py:11-27](file://backend/routers/vitals.py#L11-L27)
-- [seed_data.py:13-16](file://backend/seed_data.py#L13-L16)
 
 ## Conclusion
-The Smart Healthcare Dashboard employs a clean, normalized relational schema with clear entity relationships and robust validation through Pydantic. SQLAlchemy ORM models encapsulate business rules and enforce referential integrity. The application initializes the database at startup, seeds realistic data for demonstration, and exposes analytics endpoints leveraging aggregated queries. The documented constraints, indexing strategies, and business logic ensure data integrity and efficient operation for the dashboard’s analytics and operational needs.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The Smart Healthcare Dashboard employs a clean, normalized relational schema with clear entity relationships and robust validation through Pydantic. The new automatic database initialization system eliminates manual intervention while providing intelligent duplicate prevention checks. SQLAlchemy ORM models encapsulate business rules and enforce referential integrity. The application now automatically initializes the database at startup, seeds realistic data for demonstration, and exposes analytics endpoints leveraging aggregated queries. The documented constraints, indexing strategies, and business logic ensure data integrity and efficient operation for the dashboard's analytics and operational needs.
 
 ## Appendices
 
@@ -478,3 +520,15 @@ The Smart Healthcare Dashboard employs a clean, normalized relational schema wit
 - [doctors.py:10-69](file://backend/routers/doctors.py#L10-L69)
 - [appointments.py:53-172](file://backend/routers/appointments.py#L53-L172)
 - [vitals.py:11-71](file://backend/routers/vitals.py#L11-L71)
+
+### Appendix C: Automatic Initialization Configuration
+- **Database Location**: SQLite file `backend/healthcare.db`
+- **Startup Trigger**: FastAPI lifespan context manager in main.py
+- **Initialization Steps**: Table creation, data validation, intelligent seeding
+- **Duplicate Prevention**: Multiple layers including startup checks and business logic
+- **Error Handling**: Graceful handling of initialization failures with error logging
+
+**Section sources**
+- [main.py:8-15](file://backend/main.py#L8-L15)
+- [init_db.py:4-24](file://backend/init_db.py#L4-L24)
+- [database.py:5](file://backend/database.py#L5)

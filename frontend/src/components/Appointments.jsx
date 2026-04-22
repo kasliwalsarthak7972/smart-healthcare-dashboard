@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import { Calendar as CalendarIcon, Plus } from 'lucide-react'
 import { appointmentsAPI } from '../api'
+import ScheduleAppointmentModal from './ScheduleAppointmentModal'
 
 export default function Appointments() {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
 
   useEffect(() => {
     loadAppointments()
@@ -23,6 +25,28 @@ export default function Appointments() {
       console.error('Error loading appointments:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpdateStatus = async (appointmentId, newStatus) => {
+    try {
+      await appointmentsAPI.update(appointmentId, { status: newStatus })
+      loadAppointments()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      alert('Failed to update status')
+    }
+  }
+
+  const handleDeleteAppointment = async (appointmentId) => {
+    if (!confirm('Are you sure you want to delete this appointment?')) return
+    
+    try {
+      await appointmentsAPI.delete(appointmentId)
+      loadAppointments()
+    } catch (error) {
+      console.error('Error deleting appointment:', error)
+      alert('Failed to delete appointment')
     }
   }
 
@@ -45,7 +69,7 @@ export default function Appointments() {
 
       {/* Status Filter */}
       <div className="glass-card p-4 mb-6">
-        <div className="flex gap-4">
+        <div className="flex gap-4 justify-between">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -57,6 +81,13 @@ export default function Appointments() {
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
           </select>
+          <button 
+            onClick={() => setShowScheduleModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+          >
+            <Plus size={20} />
+            Schedule Appointment
+          </button>
         </div>
       </div>
 
@@ -86,15 +117,37 @@ export default function Appointments() {
                     {new Date(appointment.date).toLocaleDateString()}
                   </p>
                   <p className="text-white/60">{appointment.time}</p>
-                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(appointment.status)}`}>
-                    {appointment.status}
-                  </span>
+                  <div className="mt-2 flex gap-2 justify-end">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(appointment.status)}`}>
+                      {appointment.status}
+                    </span>
+                    {appointment.status === 'Pending' && (
+                      <button
+                        onClick={() => handleUpdateStatus(appointment.id, 'Confirmed')}
+                        className="px-2 py-1 bg-green-500/20 hover:bg-green-500/40 text-green-400 rounded text-xs transition-colors"
+                      >
+                        Confirm
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDeleteAppointment(appointment.id)}
+                      className="px-2 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded text-xs transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <ScheduleAppointmentModal 
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        onAppointmentAdded={loadAppointments}
+      />
     </div>
   )
 }
